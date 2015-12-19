@@ -105,3 +105,10 @@ v_prob = model:forward(v_input)
 v_mt, v_mi = v_prob:max(1)
 
 print(v_mi)
+
+v_path = 'spect/dixon.mp3.npy'
+v_input = npy4th.loadnpy(v_path):transpose(1, 2):resize(wide, conf.i.frequency_width)
+v_prob = model:forward(v_input)
+v_mt, v_mi = v_prob:max(1)
+
+print(v_mi)
