@@ -3,26 +3,26 @@ npy4th = require 'npy4th'
 
 -- TODO: move to conf
 --wide = 4096
-wide = 128
+wide = 4096
 
 -- input, model, training config
 local conf = {
   -- input
   i = {
-    num_samples = 20,
+    num_samples = 30,
     frequency_width = 128,
     path = "spect/"
   },
 
   -- model
   m = {
-    num_classes = 2,
+    num_classes = 3,
     num_hidden = 1000
   },
 
   -- training
   t = {
-    epochs = 125
+    epochs = 30
   }
 }
 
@@ -43,7 +43,7 @@ for a in paths.iterdirs(conf.i.path) do
 end
 
 -- TODO: Calculate this
-s = 6 * 512 -- wide * conf.i.frequency_width / 4 / 2 / 2
+s = 254 * 512 -- wide * conf.i.frequency_width / 4 / 2 / 2
 
 -- model
 model = nn.Sequential()
