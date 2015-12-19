@@ -1,9 +1,9 @@
 nn = require 'nn'
 npy4th = require 'npy4th'
 
+-- TODO: move to conf
 --wide = 4096
 wide = 128
-
 
 -- input, model, training config
 local conf = {
@@ -26,7 +26,7 @@ local conf = {
   }
 }
 
-
+-- load data
 x = torch.Tensor(conf.i.num_samples, wide, conf.i.frequency_width)
 yt = torch.Tensor(conf.i.num_samples)
 
@@ -42,8 +42,10 @@ for a in paths.iterdirs(conf.i.path) do
     end
 end
 
+-- TODO: Calculate this
 s = 6 * 512 -- wide * conf.i.frequency_width / 4 / 2 / 2
 
+-- model
 model = nn.Sequential()
 
 model:add(nn.TemporalConvolution(conf.i.frequency_width, 256, 4))
@@ -64,29 +66,34 @@ model:add(nn.Sigmoid())
 model:add(nn.Linear(conf.m.num_hidden, conf.m.num_classes))
 model:add(nn.LogSoftMax())
 
-criterion= nn.ClassNLLCriterion()
+criterion = nn.ClassNLLCriterion()
 
+-- training
 for e = 1, conf.t.epochs do
-    local perm = torch.randperm(yt:size(1))
+    local permutation = torch.randperm(yt:size(1))
     local loss = 0
+    local item, y, err, grad
     
     for i = 1, conf.i.num_samples do
-        item = perm[{i}]
+        item = permutation[{i}]
         y = model:forward(x[{{item}}])
 
-        local err=criterion:forward(y, yt[{item}])
+        err = criterion:forward(y, yt[{item}])
         loss = loss + err
-        local gradCriterion = criterion:backward(y,yt[{item}]);
+        grad = criterion:backward(y,yt[{item}]);
 
         model:zeroGradParameters()
-        model:backward(x[{{item}}], gradCriterion)
+        model:backward(x[{{item}}], grad)
         model:updateParameters(0.01)
     end
     
     print("epoch: " .. e .. ", loss: " .. loss/conf.i.num_samples )
 end
 
-p = model:forward(x[{1}])
+
+-- prediction
+i = 12
+p = model:forward(x[{i}])
 
 local mt, mi = p:max(1)
-print(mt, mi[0])
+print(yt[{i}], mi)
