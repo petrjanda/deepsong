@@ -92,8 +92,16 @@ end
 
 
 -- prediction
-i = 12
-p = model:forward(x[{i}])
+local v_path = 'data/7189786.LOFI.mp3.npy'
+local v_input = npy4th.loadnpy(v_path):transpose(1, 2):resize(wide, conf.i.frequency_width)
+local v_prob = model:forward(v_input)
+local v_mt, v_mi = v_prob:max(1)
 
-local mt, mi = p:max(1)
-print(yt[{i}], mi)
+print(v_mi)
+
+local v_path = 'data/3322004.LOFI.mp3'
+local v_input = npy4th.loadnpy(v_path):transpose(1, 2):resize(wide, conf.i.frequency_width)
+local v_prob = model:forward(v_input)
+local v_mt, v_mi = v_prob:max(1)
+
+print(v_mi)
