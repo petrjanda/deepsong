@@ -76,9 +76,14 @@ local params, grad_params = model:getParameters()
 
 
 -- training
+classes = {1,2,3,4,5,6,7,8}
+
+-- This matrix records the current confusion across classes
+confusion = optim.ConfusionMatrix(classes)
+ 
 for e = 1, conf.t.epochs do
     local permutation = torch.randperm(num_training_samples)
-    local loss = 0
+    local tloss = 0
     local x, y, err, grad
     
     for i = 1, num_training_samples do
@@ -110,7 +115,7 @@ for e = 1, conf.t.epochs do
           model:backward(x, df_do)
 
           -- update confusion
-          -- confusion:add(output, targets[i])
+          confusion:add(output[{1}], yt)
 
        -- normalize gradients and f(X)
        -- gradParameters:div(1)
@@ -121,10 +126,15 @@ for e = 1, conf.t.epochs do
     end
 
       local _, loss = optim.rmsprop(feval, params, optim_state)
+  
+      tloss = tloss + loss[1]
     end
     
     -- validate()
     local weights = model:get(1):parameters()[1]:clone():resize(1, 256, 512)
     image.save("weights" .. e .. ".png", weights:div(weights:mean()))
-    print("epoch: " .. e .. ", loss: " .. loss/num_training_samples)
+    print("epoch: " .. e .. ", loss: " .. tloss/num_training_samples)
+    print(confusion)
+
+    confusion:zero()
 end
