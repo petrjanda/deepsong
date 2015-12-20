@@ -71,20 +71,21 @@ criterion = nn.ClassNLLCriterion()
 
 -- validate
 function validate() 
-  function sample(path)
-    local v_input = npy4th.loadnpy(path):transpose(1, 2):resize(wide, conf.i.frequency_width)
-    local v_prob = model:forward(v_input)
-    local v_mt, v_mi = v_prob:max(1)
+  function sample(path, yt)
+    local input = npy4th.loadnpy(path):transpose(1, 2):resize(wide, conf.i.frequency_width)
+    local prob = model:forward(input)
+    local loss = criterion:forward(prob, yt)
+    local mt, mi = prob:max(1)
 
-    return v_mi[1]
+    return mi[1], loss
   end
 
+  
+  local j, jl = sample('spect/989787.LOFI.mp3.npy',1) -- jamie
+  local m, ml = sample('spect/moved.mp3.npy',2) -- move d
+  local d, dl = sample('spect/dixon.mp3.npy',3)
 
-  print(
-    sample('spect/989787.LOFI.mp3.npy'), -- jamie
-    sample('spect/3322004.LOFI.mp3.npy'), -- move d
-    sample('spect/dixon.mp3.npy')
-  )
+  print(j,m,d,(jl+ml+dl)/3)
 end
 
 -- training
