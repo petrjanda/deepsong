@@ -132,7 +132,7 @@ for e = 1, conf.t.epochs do
     
     -- validate()
     local weights = model:get(1):parameters()[1]:clone():resize(1, 256, 512)
-    image.save("weights" .. e .. ".png", weights:div(weights:mean()))
+    image.save("tmp/weights" .. e .. ".png", weights:div(weights:mean()))
     print("epoch: " .. e .. ", loss: " .. tloss/num_training_samples)
     print(confusion)
 
