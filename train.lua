@@ -10,13 +10,14 @@ local conf = {
   training = {
     frequency_width = 128,
     path = "train/",
-    width = 256
+    width = 128
   },
 
   -- model
   m = {
     num_classes = 2,
-    num_hidden = {512, 256}
+    num_hidden = {512, 256},
+    conv_size = {256, 128, 64}
   },
 
   -- training
@@ -24,7 +25,7 @@ local conf = {
     epochs = 75,
     optim = {
       learningRate = 2e-3, 
-      alpha = 0.95 
+      alpha = 1
     }
   }
 }
@@ -35,17 +36,16 @@ local training = ds.load(conf.training)
 -- model
 model = nn.Sequential()
 
-local conv_size = {256, 128, 64}
 
-model:add(nn.TemporalConvolution(conf.training.frequency_width, conv_size[1], 4))
+model:add(nn.TemporalConvolution(conf.training.frequency_width, conf.m.conv_size[1], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(4))
 
-model:add(nn.TemporalConvolution(conv_size[1], conv_size[2], 4))
+model:add(nn.TemporalConvolution(conf.m.conv_size[1], conf.m.conv_size[2], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(2))
 
-model:add(nn.TemporalConvolution(conv_size[2], conv_size[3], 4))
+model:add(nn.TemporalConvolution(conf.m.conv_size[2], conf.m.conv_size[3], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(2))
 
@@ -56,7 +56,7 @@ model:add(global)
 model:add(nn.JoinTable(2))
 
 -- classifier
-model:add(nn.Linear(2 * conv_size[3], conf.m.num_hidden[1]))
+model:add(nn.Linear(2 * conf.m.conv_size[3], conf.m.num_hidden[1]))
 model:add(nn.Sigmoid())
 
 model:add(nn.Linear(conf.m.num_hidden[1], conf.m.num_hidden[2]))
@@ -105,6 +105,7 @@ for e = 1, conf.t.epochs do
 
         -- estimate df/dW
         local df_do = criterion:backward(y, yt)
+        -- print(y, yt, df_do)
         model:backward(x, df_do)
 
         -- update confusion
@@ -117,8 +118,9 @@ for e = 1, conf.t.epochs do
         return err, grad_params
       end
 
-      local _, loss = optim.rmsprop(feval, params, conf.t.optim)
-  
+      local _, loss = optim.sgd(feval, params, conf.t.optim)
+      -- print(grad_params:norm() / params:norm())
+
       total_loss = total_loss + loss[1]
     end
     
