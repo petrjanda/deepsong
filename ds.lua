@@ -1,13 +1,13 @@
 npy4th = require 'npy4th'
 
-local function l(conf) 
-  c = 0
+local function load(conf) 
+  local count = 0
   for a in paths.iterfiles(conf.path) do
-    c = c + 1
+    count = count + 1
   end
 
-  local x = torch.Tensor(c, conf.width, conf.frequency_width)
-  local yt = torch.Tensor(c)
+  local x = torch.Tensor(count, conf.width, conf.frequency_width)
+  local yt = torch.Tensor(count)
 
   i = 1
   for s in paths.iterfiles(conf.path) do
@@ -22,9 +22,9 @@ local function l(conf)
     i = i + 1
   end
 
-  return {count=c, x=x, yt=yt}
+  return {count=count, x=x, yt=yt}
 end
 
 return {
-  load = l
+  load = load
 }
