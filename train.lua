@@ -26,7 +26,7 @@ local conf = {
 }
 
 -- load data
-local num_training_samples, dsx, dsyt = ds.load(conf)
+local training = ds.load(conf)
 
 -- model
 model = nn.Sequential()
@@ -81,11 +81,11 @@ classes = {1,2,3,4,5,6,7,8}
 confusion = optim.ConfusionMatrix(classes)
  
 for e = 1, conf.t.epochs do
-    local permutation = torch.randperm(num_training_samples)
+    local permutation = torch.randperm(training.count)
     local tloss = 0
     local x, y, err, grad
     
-    for i = 1, num_training_samples do
+    for i = 1, training.count do
       item = permutation[{i}]
 
       local feval = function(x)
@@ -102,8 +102,8 @@ for e = 1, conf.t.epochs do
 
        -- evaluate function for complete mini batch
           -- estimate f
-          x = dsx[{{item}}]
-          yt = dsyt[{item}]
+          x = training.x[{{item}}]
+          yt = training.yt[{item}]
 
           local output = model:forward(x)
           local err = criterion:forward(output, yt)
@@ -132,7 +132,7 @@ for e = 1, conf.t.epochs do
     -- validate()
     local weights = model:get(1):parameters()[1]:clone():resize(1, 256, 512)
     image.save("tmp/weights" .. e .. ".png", weights:div(weights:mean()))
-    print("epoch: " .. e .. ", loss: " .. tloss/num_training_samples)
+    print("epoch: " .. e .. ", loss: " .. tloss/training.count)
     print(confusion)
 
     confusion:zero()

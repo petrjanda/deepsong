@@ -22,7 +22,7 @@ local function l(conf)
     i = i + 1
   end
 
-  return c, x, yt
+  return {count=c, x=x, yt=yt}
 end
 
 return {
