@@ -1,4 +1,4 @@
-function loadDs(conf) 
+local function l(conf) 
   c = 0
   for a in paths.iterfiles(conf.i.path) do
     c = c + 1
@@ -22,3 +22,7 @@ function loadDs(conf)
 
   return c, x, yt
 end
+
+return {
+  load = l
+}

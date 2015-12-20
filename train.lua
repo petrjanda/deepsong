@@ -1,7 +1,7 @@
 nn = require 'nn'
 npy4th = require 'npy4th'
 
-require 'ds'
+ds = require 'ds'
 
 -- input, model, training config
 local conf = {
@@ -9,13 +9,13 @@ local conf = {
   i = {
     frequency_width = 128,
     path = "train/",
-    width = 64
+    width = 256
   },
 
   -- model
   m = {
     num_classes = 8,
-    num_hidden = 500
+    num_hidden = {512, 256}
   },
 
   -- training
@@ -25,7 +25,7 @@ local conf = {
 }
 
 -- load data
-local num_training_samples, x, yt = loadDs(conf)
+local num_training_samples, x, yt = ds.load(conf)
 
 -- model
 model = nn.Sequential()
@@ -42,43 +42,30 @@ model:add(nn.TemporalConvolution(256, 512, 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(1,2))
 
--- model:add(nn.Reshape(12))
-
 global = nn.ConcatTable()
 global:add(nn.Mean(2))
 global:add(nn.Max(2))
-
 model:add(global)
 model:add(nn.JoinTable(2))
 
-model:add(nn.Linear(2 * 512, conf.m.num_hidden))
+model:add(nn.Linear(2 * 512, conf.m.num_hidden[1]))
 model:add(nn.Sigmoid())
-model:add(nn.Linear(conf.m.num_hidden, conf.m.num_classes))
+
+model:add(nn.Linear(conf.m.num_hidden[1], conf.m.num_hidden[2]))
+model:add(nn.Sigmoid())
+
+-- model:add(nn.Reshape(14 * 512))
+-- model:add(nn.Sigmoid())
+-- model:add(nn.Linear(14 * 512, conf.m.num_hidden))
+
+model:add(nn.Linear(conf.m.num_hidden[2], conf.m.num_classes))
 model:add(nn.LogSoftMax())
+
 
 criterion = nn.ClassNLLCriterion()
 
--- validate
-function validate() 
-  function sample(path, yt)
-    local input = npy4th.loadnpy(path):transpose(1, 2)
-    w = math.floor((input:size(1) - wide) / 2)
-    input = input[{{w, w + wide - 1}, {}}]
 
-    local prob = model:forward(input)
-    local loss = criterion:forward(prob, yt)
-    local mt, mi = prob:max(1)
-
-    return mi[1], loss
-  end
-
-  
-  local j, jl = sample('spect/989787.LOFI.mp3.npy',1) -- jamie
-  local m, ml = sample('spect/moved.mp3.npy',2) -- move d
-  local d, dl = sample('spect/dixon.mp3.npy',3)
-
-  print(j .. 1,m .. 2,d .. 3,(jl+ml+dl)/3)
-end
+print(model)
 
 -- training
 for e = 1, conf.t.epochs do
