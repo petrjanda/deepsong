@@ -10,13 +10,13 @@ local conf = {
   training = {
     frequency_width = 128,
     path = "train/",
-    width = 128
+    width = 512
   },
 
   -- model
   m = {
     num_classes = 8,
-    num_hidden = {512, 256},
+    num_hidden = {128, 64},
     conv_size = {256, 128, 64}
   },
 
