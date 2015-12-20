@@ -7,7 +7,7 @@ ds = require 'ds'
 -- input, model, training config
 local conf = {
   -- input
-  i = {
+  training = {
     frequency_width = 128,
     path = "train/",
     width = 256
@@ -26,7 +26,7 @@ local conf = {
 }
 
 -- load data
-local training = ds.load(conf)
+local training = ds.load(conf.training)
 
 -- model
 model = nn.Sequential()
