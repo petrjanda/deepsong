@@ -3,23 +3,19 @@ npy4th = require 'npy4th'
 
 require 'ds'
 
--- TODO: move to conf
---wide = 4096
-wide = 512
-
 -- input, model, training config
 local conf = {
   -- input
   i = {
-    num_samples = 30,
     frequency_width = 128,
-    path = "spect/"
+    path = "train/",
+    width = 64
   },
 
   -- model
   m = {
-    num_classes = 3,
-    num_hidden = 300
+    num_classes = 8,
+    num_hidden = 500
   },
 
   -- training
@@ -86,7 +82,7 @@ end
 
 -- training
 for e = 1, conf.t.epochs do
-    local permutation = torch.randperm(yt:size(1))
+    local permutation = torch.randperm(num_training_samples)
     local loss = 0
     local item, y, err, grad
     
