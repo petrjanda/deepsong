@@ -1,3 +1,5 @@
+npy4th = require 'npy4th'
+
 local function l(conf) 
   c = 0
   for a in paths.iterfiles(conf.i.path) do

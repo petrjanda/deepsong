@@ -1,5 +1,4 @@
-n = require 'nn'
-npy4th = require 'npy4th'
+require 'nn'
 require 'image'
 require 'optim'
 
