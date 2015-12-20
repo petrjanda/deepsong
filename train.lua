@@ -35,15 +35,17 @@ local training = ds.load(conf.training)
 -- model
 model = nn.Sequential()
 
-model:add(nn.TemporalConvolution(conf.training.frequency_width, 256, 4))
+local conv_size = {256, 128, 64}
+
+model:add(nn.TemporalConvolution(conf.training.frequency_width, conv_size[1], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(4))
 
-model:add(nn.TemporalConvolution(256, 256, 4))
+model:add(nn.TemporalConvolution(conv_size[1], conv_size[2], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(2))
 
-model:add(nn.TemporalConvolution(256, 512, 4))
+model:add(nn.TemporalConvolution(conv_size[2], conv_size[3], 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(2))
 
@@ -54,7 +56,7 @@ model:add(global)
 model:add(nn.JoinTable(2))
 
 -- classifier
-model:add(nn.Linear(2 * 512, conf.m.num_hidden[1]))
+model:add(nn.Linear(2 * conv_size[3], conf.m.num_hidden[1]))
 model:add(nn.Sigmoid())
 
 model:add(nn.Linear(conf.m.num_hidden[1], conf.m.num_hidden[2]))
