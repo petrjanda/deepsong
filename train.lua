@@ -4,7 +4,7 @@ require 'optim'
 
 ds = require 'ds'
 
--- input, model, training config
+-- config
 local conf = {
   -- input
   training = {
@@ -15,7 +15,7 @@ local conf = {
 
   -- model
   m = {
-    num_classes = 8,
+    num_classes = 2,
     num_hidden = {512, 256}
   },
 
@@ -71,9 +71,8 @@ criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model:getParameters()
 
-
 -- training
-classes = {1,2,3,4,5,6,7,8}
+classes = {1,2} -- ,3,4,5,6,7,8}
 
 -- This matrix records the current confusion across classes
 confusion = optim.ConfusionMatrix(classes)
