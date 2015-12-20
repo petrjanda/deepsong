@@ -69,7 +69,6 @@ model:add(nn.LogSoftMax())
 
 criterion = nn.ClassNLLCriterion()
 
-
 -- validate
 function validate() 
   function sample(path)
