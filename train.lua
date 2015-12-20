@@ -21,7 +21,11 @@ local conf = {
 
   -- training
   t = {
-    epochs = 75
+    epochs = 75,
+    optim = {
+      learningRate = 2e-3, 
+      alpha = 0.95 
+    }
   }
 }
 
@@ -49,6 +53,7 @@ global:add(nn.Max(2))
 model:add(global)
 model:add(nn.JoinTable(2))
 
+-- classifier
 model:add(nn.Linear(2 * 512, conf.m.num_hidden[1]))
 model:add(nn.Sigmoid())
 
@@ -62,14 +67,7 @@ model:add(nn.Sigmoid())
 model:add(nn.Linear(conf.m.num_hidden[2], conf.m.num_classes))
 model:add(nn.LogSoftMax())
 
-
 criterion = nn.ClassNLLCriterion()
-
-
-local optim_state = {
-  learningRate = 2e-3, 
-  alpha = 0.95 
-}
 
 local params, grad_params = model:getParameters()
 
@@ -124,7 +122,7 @@ for e = 1, conf.t.epochs do
        return f, grad_params
     end
 
-      local _, loss = optim.rmsprop(feval, params, optim_state)
+      local _, loss = optim.rmsprop(feval, params, conf.t.optim)
   
       tloss = tloss + loss[1]
     end
