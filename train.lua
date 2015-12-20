@@ -31,7 +31,7 @@ local training = ds.load(conf.training)
 -- model
 model = nn.Sequential()
 
-model:add(nn.TemporalConvolution(conf.i.frequency_width, 256, 4))
+model:add(nn.TemporalConvolution(conf.training.frequency_width, 256, 4))
 model:add(nn.ReLU())
 model:add(nn.TemporalMaxPooling(4))
 
