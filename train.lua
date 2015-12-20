@@ -80,7 +80,7 @@ confusion = optim.ConfusionMatrix(classes)
  
 for e = 1, conf.t.epochs do
     local permutation = torch.randperm(training.count)
-    local tloss = 0
+    local total_loss = 0
     local x, y, err, grad
     
     for i = 1, training.count do
@@ -95,42 +95,36 @@ for e = 1, conf.t.epochs do
         -- reset gradients
         grad_params:zero()
 
-        -- f is the average of all criterions
-        local f = 0
+        -- evaluate
+        x = training.x[{{item}}]
+        yt = training.yt[{item}]
 
-       -- evaluate function for complete mini batch
-          -- estimate f
-          x = training.x[{{item}}]
-          yt = training.yt[{item}]
+        local y = model:forward(x)
+        local err = criterion:forward(y, yt)
 
-          local output = model:forward(x)
-          local err = criterion:forward(output, yt)
-          f = f + err
+        -- estimate df/dW
+        local df_do = criterion:backward(y, yt)
+        model:backward(x, df_do)
 
-          -- estimate df/dW
-          local df_do = criterion:backward(output, yt)
-          model:backward(x, df_do)
+        -- update confusion
+        confusion:add(y[{1}], yt)
 
-          -- update confusion
-          confusion:add(output[{1}], yt)
+        -- activate after mini-batching
+        -- gradParameters:div(1)
 
-       -- normalize gradients and f(X)
-       -- gradParameters:div(1)
-       -- f = f/1
-
-       -- return f and df/dX
-       return f, grad_params
-    end
+        -- return f and df/dX
+        return err, grad_params
+      end
 
       local _, loss = optim.rmsprop(feval, params, conf.t.optim)
   
-      tloss = tloss + loss[1]
+      total_loss = total_loss + loss[1]
     end
     
     -- validate()
     local weights = model:get(1):parameters()[1]:clone():resize(1, 256, 512)
     image.save("tmp/weights" .. e .. ".png", weights:div(weights:mean()))
-    print("epoch: " .. e .. ", loss: " .. tloss/training.count)
+    print("epoch: " .. e .. ", loss: " .. total_loss/training.count)
     print(confusion)
 
     confusion:zero()
