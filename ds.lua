@@ -1,4 +1,5 @@
 npy4th = require 'npy4th'
+require 'set'
 
 local function load(conf) 
   local count = 0
@@ -8,6 +9,7 @@ local function load(conf)
 
   local x = torch.Tensor(count, conf.width, conf.frequency_width)
   local yt = torch.Tensor(count)
+  local classes = {}
 
   i = 1
   for s in paths.iterfiles(conf.path) do
@@ -19,10 +21,12 @@ local function load(conf)
     x[i] = input[{{w+1, w + conf.width}, {}}]
     yt[i] = label
 
+    classes = Set.union(classes, Set.new{label})
+
     i = i + 1
   end
 
-  return {count=count, x=x, yt=yt}
+  return {count=count, x=x, yt=yt, classes=Set.keys(classes)}
 end
 
 return {
