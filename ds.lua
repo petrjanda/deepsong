@@ -12,9 +12,6 @@ local function load(conf)
 
   i = 1
   for s in paths.iterfiles(conf.path) do
-    input = npy4th.loadnpy(conf.path .. '/' .. s)
-    w = math.floor((input:size(1) - conf.width) / 2)
-
     label = tonumber(string.sub(s, 1, 1))
     classes = Set.union(classes, Set.new{label})
 
