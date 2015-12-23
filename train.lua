@@ -99,7 +99,7 @@ local params, grad_params = model:getParameters()
 
 -- This matrix records the current confusion across classes
 confusion = optim.ConfusionMatrix(training.classes)
-local path = os.date("%y%m%d_%H%M%S", os.time()) .. '_exp.txt'
+local path = "log/" .. os.date("%y%m%d_%H%M%S", os.time()) .. '_exp.txt'
 local w = exp.CsvWriter(path)
 local exp = exp.Experiment({'epoch', 't_valid', 'v_valid'}, w)
 
