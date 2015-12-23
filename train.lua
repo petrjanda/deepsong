@@ -24,7 +24,7 @@ local conf = {
 
   -- model
   m = {
-    num_classes = 3,
+    num_classes = 2,
     num_hidden = {256, 64},
     conv_size = {256, 128, 64},
     filters = {4,4,4},
@@ -79,9 +79,9 @@ model:add(nn.Sigmoid())
 model:add(nn.Dropout(m.classifier_dropout[2]))
 
 model:add(nn.Linear(m.num_hidden[2], m.num_classes))
-model:add(nn.LogSoftMax())
+-- model:add(nn.LogSoftMax())
 
-criterion = nn.ClassNLLCriterion()
+criterion = nn.CrossEntropyCriterion()
 
 
 print("Conf:")
@@ -169,7 +169,9 @@ for e = 1, conf.t.epochs do
     print(confusion)
     print(validation_confusion)
 
-  exp:t{e, 1-confusion.totalValid, 1-validation_confusion.totalValid}
+    exp:t{e, 1-confusion.totalValid, 1-validation_confusion.totalValid}
+
+    torch.save("tmp/model-" .. e .. ".t7", model)
 
     confusion:zero()
     validation_confusion:zero()

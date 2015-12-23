@@ -10,6 +10,7 @@ local function load(conf)
   local x = torch.Tensor(count, conf.width, conf.frequency_width)
   local yt = torch.Tensor(count)
   local classes = {}
+  local files = {}
 
   i = 1
   for s in paths.iterfiles(conf.path) do
@@ -24,11 +25,13 @@ local function load(conf)
     classes = Set.union(classes, Set.new{label})
 
     -- print(type_count())
+    
+    files[i] = s
 
     i = i + 1
   end
 
-  return {count=count, x=x, yt=yt, classes=Set.keys(classes)}
+  return {count=count, files=files, x=x, yt=yt, classes=Set.keys(classes)}
 end
 
 function count_all(f)
