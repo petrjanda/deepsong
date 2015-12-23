@@ -2,6 +2,8 @@ require 'nn'
 require 'image'
 require 'optim'
 
+exp = require 'experiment'
+
 ds = require 'ds'
 
 -- config
@@ -22,21 +24,20 @@ local conf = {
 
   -- model
   m = {
-    num_classes = 8,
-    num_hidden = {128, 64},
+    num_classes = 3,
+    num_hidden = {256, 64},
     conv_size = {256, 128, 64},
     filters = {4,4,4},
     pooling = {4,2,2},
-
-    classifier_dropout = {.2, .2}
+    classifier_dropout = {.5, .5}
   },
 
   -- training
   t = {
-    epochs = 75,
+    epochs = 50,
     optim = {
       learningRate = 2e-3, 
-      alpha = 1
+      alpha = .95
     }
   }
 }
@@ -64,11 +65,12 @@ model:add(nn.TemporalMaxPooling(m.pooling[3]))
 global = nn.ConcatTable()
 global:add(nn.Mean(2))
 global:add(nn.Max(2))
+global:add(nn.Min(2))
 model:add(global)
 model:add(nn.JoinTable(2))
 
 -- classifier
-model:add(nn.Linear(2 * m.conv_size[3], m.num_hidden[1]))
+model:add(nn.Linear(3 * m.conv_size[3], m.num_hidden[1]))
 model:add(nn.Sigmoid())
 model:add(nn.Dropout(m.classifier_dropout[1]))
 
@@ -97,8 +99,14 @@ local params, grad_params = model:getParameters()
 
 -- This matrix records the current confusion across classes
 confusion = optim.ConfusionMatrix(training.classes)
+local path = os.date("%y%m%d_%H%M%S", os.time()) .. '_exp.txt'
+local w = exp.CsvWriter(path)
+local exp = exp.Experiment({'epoch', 't_valid', 'v_valid'}, w)
+
+print(path)
 
 for e = 1, conf.t.epochs do
+
     local permutation = torch.randperm(training.count)
     local total_loss = 0
     local x, y, err, grad
@@ -161,5 +169,8 @@ for e = 1, conf.t.epochs do
     print(confusion)
     print(validation_confusion)
 
+  exp:t{e, 1-confusion.totalValid, 1-validation_confusion.totalValid}
+
     confusion:zero()
+    validation_confusion:zero()
 end
