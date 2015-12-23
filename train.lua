@@ -99,7 +99,7 @@ local params, grad_params = model:getParameters()
 
 -- This matrix records the current confusion across classes
 confusion = optim.ConfusionMatrix(training.classes)
-local path = os.date("%y%m%d_%H%M%S", os.time()) .. '_exp.txt'
+local path = "log/" .. os.date("%y%m%d_%H%M%S", os.time()) .. '_exp.txt'
 local w = exp.CsvWriter(path)
 local exp = exp.Experiment({'epoch', 't_valid', 'v_valid'}, w)
 
@@ -124,11 +124,11 @@ for e = 1, conf.t.epochs do
         grad_params:zero()
 
         -- evaluate
-        x = training.x[{{item}}]
-        yt = training.yt[{item}]
+        x, yt = ds.batch(training, i, 1, conf.training)
 
         local y = model:forward(x)
         local err = criterion:forward(y, yt)
+
 
         -- estimate df/dW
         local df_do = criterion:backward(y, yt)
@@ -154,8 +154,7 @@ for e = 1, conf.t.epochs do
     -- calculate validation set
     validation_confusion = optim.ConfusionMatrix(training.classes)
     for i = 1, validation.count do
-        x = validation.x[{{i}}]
-        yt = validation.yt[{i}]
+        x, yt = ds.batch(validation, i, 1, conf.validation)
         y = model:forward(x)
 
         validation_confusion:add(y[{1}], yt)
