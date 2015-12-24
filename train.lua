@@ -25,10 +25,10 @@ local conf = {
   -- model
   m = {
     num_classes = 2,
-    num_hidden = {256, 64},
+    num_hidden = {512, 128},
     conv_size = {256, 128, 64},
-    filters = {4,4,4},
-    pooling = {4,2,2},
+    filters = {16,8,8},
+    pooling = {8,4,4},
     classifier_dropout = {.5, .5}
   },
 
@@ -161,7 +161,8 @@ for e = 1, conf.t.epochs do
         validation_confusion:add(y[{1}], yt)
     end
 
-    local weights = model:get(1):parameters()[1]:clone() --:resize(1, 256, 512)
+    local weights = model:get(1).weight:clone() --:resize(1, 256, 512)
+    print(weights:size())
     image.save("tmp/weights" .. e .. ".png", weights:div(weights:mean()))
     print("")
     print("----------")

@@ -26,8 +26,11 @@ for i = 1, validation.count do
     _, max = torch.max(y, 2)
 
 
-    if(yt ~= max[1][1]) then
-      print(validation.files[i], labels[yt], '-->', labels[max[1][1]])
+    norm = nn.Normalize(1)
+    probabilistic = norm:forward(y)
+
+    if(yt == max[1][1] and probabilistic[1][max[1][1]] > 0.9) then
+      print(validation.files[i], yt, '-->', max[1][1], probabilistic[1][max[1][1]])
       j = j + 1
     end
 
